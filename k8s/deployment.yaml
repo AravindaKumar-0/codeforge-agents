@@ -23,7 +23,7 @@ metadata:
     app: codeforge-agents
     team: forge-platform          # K8-1
 spec:
-  replicas: 2                     # K8-4
+  replicas: 1                     # K8-4
   selector:
     matchLabels:
       app: codeforge-agents
