@@ -43,11 +43,33 @@ pipeline {
                 '''
             }
         }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USER',
+                        passwordVariable: 'DOCKERHUB_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        set +x
+                        echo "$DOCKERHUB_TOKEN" | docker login \
+                          --username "$DOCKERHUB_USER" \
+                          --password-stdin
+
+                        docker push "${IMAGE_NAME}:${IMAGE_TAG}"
+                        docker logout
+                    '''
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'Docker image built successfully.'
+            echo 'Docker image built and pushed successfully.'
         }
         failure {
             echo 'Pipeline failed. Check Console Output.'
