@@ -6,30 +6,51 @@ pipeline {
         timestamps()
     }
 
+    environment {
+        IMAGE_NAME = 'imaravinda/codeforge-agents'
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
-                sh 'git rev-parse --short HEAD'
+                script {
+                    env.IMAGE_TAG = sh(
+                        script: 'git rev-parse --short=12 HEAD',
+                        returnStdout: true
+                    ).trim()
+                }
+                echo "Image tag: ${IMAGE_TAG}"
             }
         }
 
         stage('Inspect Project') {
             steps {
                 sh '''
-                    echo "Checking project files..."
-                    ls -la
                     test -f Dockerfile
                     test -f requirements.txt
+                    echo "Project files verified."
                 '''
             }
         }
 
-        stage('CI/CD Setup Check') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Checkout and project structure checks passed.'
-                echo 'Docker build, image push, and GitOps update will be added next.'
+                sh '''
+                    docker build \
+                      -t ${IMAGE_NAME}:${IMAGE_TAG} \
+                      .
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Docker image built successfully.'
+        }
+        failure {
+            echo 'Pipeline failed. Check Console Output.'
         }
     }
 }
