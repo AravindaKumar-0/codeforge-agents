@@ -182,7 +182,7 @@ ASKPASS
 
     post {
         success {
-            echo 'SUCCESS: Image published and GitOps update completed.'
+            echo 'SUCCESS: Image published and GitOps update completed. '
         }
 
         failure {
